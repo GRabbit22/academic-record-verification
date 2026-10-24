@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#10172b">
+    <title>AcadVerify | Academic Record Verification</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+
+<body>
+    <header class="topbar">
+        <a href="/" class="brand">
+            <span class="brand-icon">A</span>
+            <span>
+                Acad<span class="accent">Verify</span>
+                <small>ACADEMIC TRUST PLATFORM</small>
+            </span>
+        </a>
+
+        <nav>
+            {% if current_user.is_authenticated %}
+                <a href="#register">Register Record</a>
+                <span class="network">Admin logged in</span>
+
+                <form action="{{ url_for('main.admin_logout') }}"
+                      method="POST"
+                      style="display:inline;">
+                    <button type="submit" class="nav-logout">Logout</button>
+                </form>
+            {% else %}
+                <a href="{{ url_for('main.admin_login') }}">Admin Login</a>
+            {% endif %}
+
+            <a href="#verify">Verify Document</a>
+            <span class="network"><span></span> Local Demo</span>
+        </nav>
+    </header>
+
+    <main class="container">
+
+        <!-- HERO SECTION -->
+        <section class="hero">
+            <div class="hero-copy">
+                <div class="eyebrow">
+                    <span class="pulse"></span>
+                    DIGITAL ACADEMIC TRUST
+                </div>
+
+                <h1>
+                    Your achievements.<br>
+                    <span>Verified with confidence.</span>
+                </h1>
+
+                <p>
+                    Register academic documents, generate unique SHA-256
+                    fingerprints, and verify document integrity in seconds.
+                </p>
+
+                <div class="hero-actions">
+                    {% if current_user.is_authenticated %}
+                        <a class="btn btn-primary" href="#register">
+                            ＋ Register a record
+                        </a>
+                    {% else %}
+                        <a class="btn btn-primary"
+                           href="{{ url_for('main.admin_login') }}">
+                            ＋ Admin Login
+                        </a>
+                    {% endif %}
+
+                    <a class="btn btn-outline" href="#verify">
+                        Verify a document ↗
+                    </a>
+                </div>
+
+                <div class="trust-note">
+                    <span>✓</span> File integrity checks
+                    <span>✓</span> Duplicate detection
+                    <span>✓</span> Instant hash matching
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <div class="orb orb-one"></div>
+                <div class="orb orb-two"></div>
+
+                <div class="visual-card">
+                    <div class="visual-top">
+                        <span class="mini-icon">✦</span>
+                        <span class="tiny-label">DOCUMENT INTEGRITY</span>
+                        <span class="live-dot"></span>
+                    </div>
+
+                    <div class="certificate">
+                        <div class="certificate-seal">A</div>
+                        <div class="skeleton wide"></div>
+                        <div class="skeleton medium"></div>
+                        <div class="skeleton short"></div>
+
+                        <div class="certificate-footer">
+                            <span>ACADEMIC RECORD</span>
+                            <span class="verified-label">SHA-256 READY</span>
+                        </div>
+                    </div>
+
+                    <div class="hash-preview">
+                        <span>FILE FINGERPRINT</span>
+                        <code>Unique hash generated from file bytes</code>
+                    </div>
+
+                    <div class="visual-caption">
+                        <span class="shield">✓</span>
+                        <div>
+                            <strong>Integrity by design</strong>
+                            <small>Every file has its own fingerprint</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="floating-tag">⌁ &nbsp; SHA-256 hashing</div>
+            </div>
+        </section>
+
+        <!-- SECTION HEADING -->
+        <section class="section-heading">
+            <div>
+                <div class="eyebrow">GET STARTED</div>
+                <h2>Manage your academic records</h2>
+                <p>Choose an action to continue.</p>
+            </div>
+
+            <div class="privacy-chip">
+                ⌑ &nbsp; Your file is hashed locally for preview
+            </div>
+        </section>
+
+        <!-- REGISTRATION AND VERIFICATION PANELS -->
+        <section class="work-grid">
+
+            <!-- REGISTRATION: ADMIN ONLY -->
+            {% if current_user.is_authenticated %}
+            <article class="panel" id="register">
+                <div class="panel-heading">
+                    <div class="panel-icon purple">↥</div>
+
+                    <div>
+                        <h3>Register a record</h3>
+                        <p>Add an academic document to the registry.</p>
+                    </div>
+
+                    <span class="step">01</span>
+                </div>
+
+                <form action="{{ url_for('main.register') }}"
+                      method="POST"
+                      enctype="multipart/form-data">
+
+                    <label for="student_name">Student name</label>
+                    <input
+                        id="student_name"
+                        type="text"
+                        name="student_name"
+                        placeholder="Enter student's full name"
+                        maxlength="120"
+                        required
+                    >
+
+                    <label for="record_name">Academic record name</label>
+                    <input
+                        id="record_name"
+                        type="text"
+                        name="record_name"
+                        placeholder="e.g. Semester 1 Marksheet"
+                        maxlength="160"
+                        required
+                    >
+
+                    <label for="register_document">
+                        Upload academic document
+                    </label>
+
+                    <div class="dropzone" data-dropzone>
+                        <input
+                            id="register_document"
+                            type="file"
+                            name="document"
+                            class="file-input"
+                            accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx"
+                            required
+                        >
+
+                        <div class="upload-symbol">↑</div>
+                        <strong>Drop your file here</strong>
+                        <span>or <u>browse files</u></span>
+                        <small>PDF, images, DOC or DOCX</small>
+                    </div>
+
+                    <div class="file-preview" hidden>
+                        <div class="preview-content"></div>
+                        <button
+                            type="button"
+                            class="remove-file"
+                            aria-label="Remove selected file"
+                        >×</button>
+                    </div>
+
+                    <div class="hash-box" hidden>
+                        <div class="hash-title">
+                            <span>SHA-256 FINGERPRINT</span>
+                            <span class="hash-status">GENERATING</span>
+                        </div>
+
+                        <code class="hash-value"></code>
+
+                        <button type="button" class="copy-hash">
+                            Copy fingerprint
+                        </button>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">
+                        Register academic record <span>→</span>
+                    </button>
+                </form>
+
+                <p class="panel-foot">
+                    Registration uses your existing Flask backend.
+                </p>
+            </article>
+
+            {% else %}
+
+            <!-- SHOWN WHEN ADMIN IS NOT LOGGED IN -->
+            <article class="panel" id="register">
+                <div class="panel-heading">
+                    <div class="panel-icon purple">01</div>
+
+                    <div>
+                        <h3>Admin access required</h3>
+                        <p>Sign in to register a new academic record.</p>
+                    </div>
+                </div>
+
+                <p>
+                    Only an authorized administrator can add records.
+                </p>
+
+                <a
+                    class="btn btn-primary btn-full"
+                    href="{{ url_for('main.admin_login') }}"
+                >
+                    Sign in as Admin →
+                </a>
+            </article>
+            {% endif %}
+
+            <!-- DOCUMENT VERIFICATION: PUBLIC -->
+            <article class="panel" id="verify">
+                <div class="panel-heading">
+                    <div class="panel-icon green">✓</div>
+
+                    <div>
+                        <h3>Verify a document</h3>
+                        <p>Check whether a file matches a registered record.</p>
+                    </div>
+
+                    <span class="step">02</span>
+                </div>
+
+                <form action="{{ url_for('main.verify') }}"
+                      method="POST"
+                      enctype="multipart/form-data">
+
+                    <div class="verify-info">
+                        <span class="info-icon">i</span>
+                        <p>
+                            Upload the original document. Even a small change
+                            to its bytes can produce a different fingerprint.
+                        </p>
+                    </div>
+
+                    <label for="verify_document">Document to verify</label>
+
+                    <div class="dropzone" data-dropzone>
+                        <input
+                            id="verify_document"
+                            type="file"
+                            name="document"
+                            class="file-input"
+                            accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx"
+                            required
+                        >
+
+                        <div class="upload-symbol green-upload">⌕</div>
+                        <strong>Drop your file here</strong>
+                        <span>or <u>browse files</u></span>
+                        <small>Choose the document you want to check</small>
+                    </div>
+
+                    <div class="file-preview" hidden>
+                        <div class="preview-content"></div>
+                        <button
+                            type="button"
+                            class="remove-file"
+                            aria-label="Remove selected file"
+                        >×</button>
+                    </div>
+
+                    <div class="hash-box" hidden>
+                        <div class="hash-title">
+                            <span>SHA-256 FINGERPRINT</span>
+                            <span class="hash-status">GENERATING</span>
+                        </div>
+
+                        <code class="hash-value"></code>
+
+                        <button type="button" class="copy-hash">
+                            Copy fingerprint
+                        </button>
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-full">
+                        Verify document integrity <span>→</span>
+                    </button>
+                </form>
+
+                <p class="panel-foot">
+                    Results are based on the registered hash.
+                </p>
+            </article>
+        </section>
+
+        <!-- HOW IT WORKS -->
+        <section class="how-section">
+            <div class="eyebrow">HOW IT WORKS</div>
+            <h2>Trust, in three simple steps.</h2>
+
+            <div class="steps-grid">
+                <div class="step-card">
+                    <span>01</span>
+                    <h3>Upload</h3>
+                    <p>
+                        Select an academic document or image from your device.
+                    </p>
+                </div>
+
+                <div class="step-card">
+                    <span>02</span>
+                    <h3>Fingerprint</h3>
+                    <p>
+                        SHA-256 converts the exact file bytes into a
+                        fixed-length hash.
+                    </p>
+                </div>
+
+                <div class="step-card">
+                    <span>03</span>
+                    <h3>Compare</h3>
+                    <p>
+                        The backend checks whether that fingerprint is
+                        registered.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer>
+            <a href="/" class="brand footer-brand">
+                <span class="brand-icon">A</span>
+                <span>Acad<span class="accent">Verify</span></span>
+            </a>
+
+            <span>
+                Academic Record Verification · Final-Year Project Demo
+            </span>
+        </footer>
+    </main>
+</body>
+</html>
